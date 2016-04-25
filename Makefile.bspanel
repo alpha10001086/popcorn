@@ -1,0 +1,21 @@
+PREFIX := $(PJ_PREFIX)
+DOCROOT := $(PREFIX)/var/www
+
+ifeq ($(PJ_RDTEST),yes)
+BOOTSTRAP := $(DOCROOT)/bootstrap
+BSPANEL := $(DOCROOT)/bspanel
+endif
+
+.PHONY: all clean install
+all:
+clean:
+
+install:
+ifeq ($(PJ_RDTEST),yes)
+	install -d -m 0755 $(BOOTSTRAP)/
+	install -d -m 0755 $(BSPANEL)/
+	cp -r bootstrap/* $(BOOTSTRAP)/
+	cp -r bspanel/* $(BSPANEL)/
+	find $(DOCROOT) -depth -type d -name '.svn' -o -name '.git' | xargs rm -rf
+endif
+
