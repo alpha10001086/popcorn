@@ -266,7 +266,7 @@
                   <td><div class="radio"><label><input type="radio" value="blink" name="watchdog_radio_wps" id="watchdog_radio_wps_blink"></label></div></td>
                 </tr>
                 <tr>
-                  <td colspan="4"><button type="button" class="btn btn-default" id="watchdog_button_clear">CLEAR</button></td>
+                  <td colspan="4"><button type="button" class="btn btn-default" id="watchdog_button_clear_leds">CLEAR</button></td>
                 </tr>
               </tbody>
             </table>
@@ -325,14 +325,76 @@
 
     <!-- panel.pages["ircutr"] -->
     <div class="container content" id="content_ircutr"  style="display: none;">
-      <h2>IrCutR control</h2>
-      <p style="margin-top: 180px; text-align: center; font-size: 28px;">TBD</p>
+      <div class="page-header">
+        <h2>IrCutR control</h2>
+      </div>
+      <div class="panel-group">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" href="#panel_ircutr">IrCutR control</a>
+            </h4>
+          </div>
+          <div id="panel_ircutr" class="panel-collapse collapse in">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>&nbsp;</th>
+                  <th>On</th>
+                  <th>Off</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>IrCutR control</td>
+                  <td><div class="radio"><label><input type="radio" value="on"    name="watchdog_radio_ircutr" id="watchdog_radio_ircutr_on"   ></label></div></td>
+                  <td><div class="radio"><label><input type="radio" value="off"   name="watchdog_radio_ircutr" id="watchdog_radio_ircutr_off"  ></label></div></td>
+                </tr>
+                <tr>
+                  <td colspan="3"><button type="button" class="btn btn-default" id="watchdog_button_clear_ircutr">CLEAR</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div><!-- class="container content" id="content_ircutr" -->
 
     <!-- panel.pages["ir"] -->
     <div class="container content" id="content_ir"  style="display: none;">
-      <h2>IR LED control</h2>
-      <p style="margin-top: 180px; text-align: center; font-size: 28px;">TBD</p>
+      <div class="page-header">
+        <h2>IR LED control</h2>
+      </div>
+      <div class="panel-group">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" href="#panel_ir">IR LED control</a>
+            </h4>
+          </div>
+          <div id="panel_ir" class="panel-collapse collapse in">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>&nbsp;</th>
+                  <th>On</th>
+                  <th>Off</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>IR LED control</td>
+                  <td><div class="radio"><label><input type="radio" value="on"    name="watchdog_radio_ir" id="watchdog_radio_ir_on"   ></label></div></td>
+                  <td><div class="radio"><label><input type="radio" value="off"   name="watchdog_radio_ir" id="watchdog_radio_ir_off"  ></label></div></td>
+                </tr>
+                <tr>
+                  <td colspan="3"><button type="button" class="btn btn-default" id="watchdog_button_clear_ir">CLEAR</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div><!-- class="container content" id="content_ir" -->
 
     <!-- panel.pages["pir"] -->
@@ -524,7 +586,7 @@ function PageLeds(parent, id) {
 }
 
 PageLeds.prototype.initialize = function() {
-    that = this;    // set that to the instance of Panel.
+    var that = this;    // set that to the instance of Panel.
     $("input[type=radio][name=watchdog_radio_power]").change(function() {
         that.setLed(this.id, "led", "power", this.value);
     });
@@ -543,7 +605,7 @@ PageLeds.prototype.initialize = function() {
     $("#watchdog_button_restart").on("click", function() {
         that.setButton(this.id, "restart", "restart");
     });
-    $("#watchdog_button_clear").on("click", function() {
+    $("#watchdog_button_clear_leds").on("click", function() {
         $(':radio').removeProp('checked');
     });
 }
@@ -649,12 +711,52 @@ function PageIrCutR(parent, id) {
     Page.call(this, parent, id);
 }
 
+PageIrCutR.prototype.initialize = function() {
+    var that = this;    // set that to the instance of Panel.
+    $("input[type=radio][name=watchdog_radio_ircutr]").change(function() {
+        that.setICR(this.id, "icr", "ircutr", this.value);
+    });
+    $("#watchdog_button_clear_ircutr").on("click", function() {
+        $(':radio').removeProp('checked');
+    });
+}
+
+PageIrCutR.prototype.setICR = function(from, what, id, value) {
+    var params = {
+        "from": from,
+        "what": what,
+        "id": id,
+        "value": value
+    }
+    this.parent.cgiSend("POST", "/bspanel/cgi/watchdog.cgi", params, this.parent.cgiCallback);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // PageIR
 PageIR.prototype = Object.create(Page.prototype);
 
 function PageIR(parent, id) {
     Page.call(this, parent, id);
+}
+
+PageIR.prototype.initialize = function() {
+    var that = this;    // set that to the instance of Panel.
+    $("input[type=radio][name=watchdog_radio_ir]").change(function() {
+        that.setIR(this.id, "led", "ir", this.value);
+    });
+    $("#watchdog_button_clear_ir").on("click", function() {
+        $(':radio').removeProp('checked');
+    });
+}
+
+PageIR.prototype.setIR = function(from, what, id, color) {
+    var params = {
+        "from": from,
+        "what": what,
+        "id": id,
+        "color": color
+    }
+    this.parent.cgiSend("POST", "/bspanel/cgi/watchdog.cgi", params, this.parent.cgiCallback);
 }
 
 //////////////////////////////////////////////////////////////////////////////
